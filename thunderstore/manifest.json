@@ -1,6 +1,6 @@
 {
   "name": "BigRadio",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "",
   "description": "Swap the music on each in-game FM radio station for your own .ogg, .wav or .mp3 files. Client-side: only you hear it, nobody else needs the mod.",
   "dependencies": [
