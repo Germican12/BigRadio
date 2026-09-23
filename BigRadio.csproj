@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>BigRadio</AssemblyName>
+    <RootNamespace>BigRadio</RootNamespace>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <DebugType>none</DebugType>
+
+    <!-- Your Thunderstore Mod Manager profile. Override with: dotnet build -p:ProfileDir="..." -->
+    <ProfileDir Condition="'$(ProfileDir)' == ''">$(APPDATA)\Thunderstore Mod Manager\DataFolder\BigWalk\profiles\Default</ProfileDir>
+    <BepInExDir>$(ProfileDir)\BepInEx</BepInExDir>
+    <TeamName>ArtemisCorp</TeamName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="$(BepInExDir)\core\BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\0Harmony.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\*.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- Release build: copy the DLL into your profile for testing and create the Thunderstore zip in .\dist -->
+  <Target Name="DeployAndPackage" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <PluginDeployDir>$(BepInExDir)\plugins\$(TeamName)-$(AssemblyName)</PluginDeployDir>
+      <StageDir>$(MSBuildProjectDirectory)\dist\stage</StageDir>
+      <PackageZip>$(MSBuildProjectDirectory)\dist\$(TeamName)-$(AssemblyName)-$(Version).zip</PackageZip>
+      <HasIcon Condition="Exists('thunderstore\icon.png')">true</HasIcon>
+    </PropertyGroup>
+
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDeployDir)" ContinueOnError="true" />
+    <Message Importance="high" Text="BigRadio: DLL copied to profile plugins folder ($(TeamName)-$(AssemblyName))" />
+
+    <RemoveDir Directories="$(StageDir)" />
+    <Copy SourceFiles="$(TargetPath);thunderstore\manifest.json;README.md;CHANGELOG.md;LICENSE" DestinationFolder="$(StageDir)" />
+    <Copy SourceFiles="thunderstore\icon.png" DestinationFolder="$(StageDir)" Condition="'$(HasIcon)' == 'true'" />
+    <Warning Text="BigRadio: thunderstore\icon.png (256x256 PNG) is missing - Thunderstore zip not created." Condition="'$(HasIcon)' != 'true'" />
+    <ZipDirectory SourceDirectory="$(StageDir)" DestinationFile="$(PackageZip)" Overwrite="true" Condition="'$(HasIcon)' == 'true'" />
+    <Message Importance="high" Text="BigRadio: package ready -> dist\$(TeamName)-$(AssemblyName)-$(Version).zip" Condition="'$(HasIcon)' == 'true'" />
+  </Target>
+
+</Project>
